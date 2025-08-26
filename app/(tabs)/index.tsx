@@ -10,13 +10,14 @@ import EmojiSticker from '@/components/EmojiSticker';
 import IconButton from '@/components/IconButton';
 import ImageViewer from '@/components/ImageViewer';
 import * as MediaLibrary from 'expo-media-library';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { captureRef } from 'react-native-view-shot';
 
 
 const PlaceholderImage = require('@/assets/images/images/background-image.png');
 
 export default function Index() {
-  const imageRef = useRef (null);
+  const imageRef = useRef <View>(null);
   const [ permissionResponse, requestPermission ] = MediaLibrary.usePermissions();
 
   const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
@@ -61,24 +62,25 @@ export default function Index() {
 
   const onSaveImageAsync = async () => {
     try {
-      const localUri = await captureRef( imageRef,{
-        height:400,
+      const localUri = await captureRef (imageRef,{
+        height:440,
         quality:1,
       });
+
       await MediaLibrary.saveToLibraryAsync(localUri);
       if (localUri) {
-        alert('Saved!');
+        alert("Saved!");
       }
-
     } catch (e) {
       console.log(e);
     }
   };
 
   return (
+    <GestureHandlerRootView style={styles.container}>
     <View style={styles.container}>
       <View ref={imageRef}  style={styles.imageContainer}>
-        <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+        <ImageViewer imgSource={selectedImage || PlaceholderImage} />
         {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} /> }
       </View>
       {showAppOptions ? (
@@ -86,7 +88,10 @@ export default function Index() {
           <View style={styles.optionsRow}>
             <IconButton icon="refresh" label="Reset" onPress={onReset} />
             <CircleButton onPress={onAddSticker} />
-            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+            <IconButton
+                icon="save-alt" 
+                label="Save" 
+                onPress={onSaveImageAsync} />
           </View>
         </View>
       ) : (
@@ -99,6 +104,7 @@ export default function Index() {
            <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} /> 
       </EmojiPicker>
     </View>
+    </GestureHandlerRootView>
   );
 }
 
